@@ -3,6 +3,7 @@ package com.nikosnockoffs.android.treespotter_firebase
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.DialogInterface
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -28,6 +29,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.GeoPoint
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 private const val TAG = "TREE_MAP_FRAGMENT"
@@ -237,15 +239,17 @@ class TreeMapFragment : Fragment() {
         fusedLocationProvider?.lastLocation?.addOnCompleteListener(requireActivity()){ locationRequestTask ->
             val location = locationRequestTask.result
             if(location !=null) {
-                val treeName = getTreeName()
-                val tree = Tree(
-                    name = treeName,
-                    dateSpotted = Date(),
-                    location = GeoPoint(location.latitude, location.longitude)
-                )
-                treeViewModel.addTree(tree)
-                moveMapToUserLocation()
-                showSnackbar(getString(R.string.added_tree, treeName) )
+                getTreeName { treeName ->
+                    val tree = Tree(
+                        name = treeName,
+                        dateSpotted = Date(),
+                        location = GeoPoint(location.latitude, location.longitude)
+                    )
+                    treeViewModel.addTree(tree)
+
+                    moveMapToUserLocation()
+                    showSnackbar(getString(R.string.added_tree, treeName))
+                }
             } else {
                 showSnackbar(getString(R.string.no_location))
             }
@@ -288,9 +292,24 @@ class TreeMapFragment : Fragment() {
 
     }
 
-    private fun getTreeName(): String {
-        return listOf("Fir", "Oak", "Pine", "Hemlock", "Elm").random()
-    // todo figure out how to ask user for tree name
+    private fun getTreeName( callback: (String) -> Unit ) {
+
+        AlertDialog.Builder(requireActivity())
+            .setTitle(getString(R.string.ask_tree_type))
+            .setItems(R.array.tree_options) { dialog, which ->
+                // put tree options into an array resource
+                val treeOptions = resources.getStringArray(R.array.tree_options)
+                // have selection of tree name as val based on index user selects from array
+                val treePicked = treeOptions[which]
+                callback(treePicked)
+            }
+            .setNegativeButton(android.R.string.cancel) { dialog, id ->
+                // pass
+            }
+            .create()
+            .show()
+
+
     }
 
     companion object {

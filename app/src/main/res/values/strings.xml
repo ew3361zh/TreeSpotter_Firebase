@@ -10,4 +10,7 @@
     <string name="confirm_delete_tree">Delete tree %1$s?</string>
     <string name="delete">Delete?</string>
     <string name="tree_deleted">Deleted tree %1$s</string>
+    <string name="tree_name">Tree Name</string>
+    <string name="tree_name_here">Enter tree name here</string>
+    <string name="ask_tree_type">What type of tree is it?</string>
 </resources>
